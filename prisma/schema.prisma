@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model EmpresaDestda {
+  id                String      @id @default(uuid())
+  cnpj              String
+  razaoSocial       String      @map("razao_social")
+  inscricaoEstadual String?     @map("inscricao_estadual")
+  uf                String
+  municipio         String
+  regimeTributario  String      @map("regime_tributario")
+  competenciaMes    Int         @map("competencia_mes")
+  competenciaAno    Int         @map("competencia_ano")
+  responsavel       String?
+  observacoes       String?
+  status            String      @default("aguardando")
+  mensagemErro      String?     @map("mensagem_erro")
+  bloqueadoEm       DateTime?   @map("bloqueado_em")
+  criadoEm          DateTime    @default(now()) @map("criado_em")
+  atualizadoEm      DateTime    @updatedAt @map("atualizado_em")
+  processadoEm      DateTime?   @map("processado_em")
+  logs              LogDestda[]
+
+  @@map("empresas_destda")
+}
+
+model LogDestda {
+  id              String        @id @default(uuid())
+  empresaDestdaId String        @map("empresa_destda_id")
+  statusAnterior  String?       @map("status_anterior")
+  statusNovo      String?       @map("status_novo")
+  mensagem        String?
+  criadoEm        DateTime      @default(now()) @map("criado_em")
+  empresa         EmpresaDestda @relation(fields: [empresaDestdaId], references: [id], onDelete: Cascade)
+
+  @@map("logs_destda")
+}
+
+model Usuario {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  senhaHash String   @map("senha_hash")
+  ativo     Boolean  @default(true)
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  @@map("usuarios")
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  descricao String
+  chave     String   @unique
+  ativa     Boolean  @default(true)
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  @@map("api_keys")
+}
